@@ -1,8 +1,4 @@
-﻿# Eliminar archivos
-rm -f package.json package-lock.json
-
-# Crear package.json limpio
-cat > package.json << 'EOF'
+﻿
 {
   "name": "entel-factibilidad-bot",
   "version": "1.0.0",
@@ -17,12 +13,3 @@ cat > package.json << 'EOF'
     "puppeteer-extra-plugin-stealth": "^2.11.2"
   }
 }
-EOF
-
-# Instalar
-npm install
-
-# Subir
-git add package.json package-lock.json
-git commit -m "Fix: Clean package.json"
-git push origin main
