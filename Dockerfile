@@ -1,8 +1,14 @@
 ﻿FROM node:20-bookworm-slim
 
+# Instalar Chromium y todas las dependencias necesarias
 RUN apt-get update && apt-get install -y \
     chromium \
     fonts-liberation \
+    fonts-ipafont-gothic \
+    fonts-wqy-zenhei \
+    fonts-thai-tlwg \
+    fonts-kacst \
+    fonts-freefont-ttf \
     libnss3 \
     libx11-6 \
     libxcb1 \
@@ -22,19 +28,36 @@ RUN apt-get update && apt-get install -y \
     libxrandr2 \
     libxss1 \
     libgtk-3-0 \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    --no-install-recommends \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
+# Variables de entorno para puppeteer
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     NODE_ENV=production
 
+# Crear directorio de trabajo
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+# Copiar archivos de dependencias
+COPY package*.json ./
+
+# Instalar dependencias
 RUN npm install
 
+# Copiar el resto del código
 COPY . .
 
+# Crear directorio para imágenes (si no existe)
 RUN mkdir -p imagenes
 
-CMD ["node", "index.js"]
+# Crear usuario no-root para mayor seguridad (opcional pero recomendado)
+RUN groupadd -r pptruser && useradd -r -g pptruser -G audio,video pptruser \
+    && chown -R pptruser:pptruser /app
+
+# Cambiar a usuario no-root
+USER pptruser
+
+# Comando para ejecutar el bot
+CMD ["npm", "start"]

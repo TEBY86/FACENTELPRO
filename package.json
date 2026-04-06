@@ -1,20 +1,14 @@
 ﻿{
-  "name": "bot-factibilidad-entel",
+  "name": "entel-factibilidad-bot",
   "version": "1.0.0",
-  "description": "Bot Telegram para verificar factibilidad Entel Fibra",
-  "main": "index.js",
+  "description": "Bot de factibilidad Entel",
+  "main": "bot.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node bot.js"
   },
   "dependencies": {
-    "node-telegram-bot-api": "^0.66.0",
-    "puppeteer": "^19.11.1",
     "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2"
-  },
-  "engines": {
-    "node": ">=20.0.0"
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "node-telegram-bot-api": "^0.64.0"
   }
 }
-
-
