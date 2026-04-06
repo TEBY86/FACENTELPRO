@@ -1472,3 +1472,6 @@ async function main() {
 
 process.on('unhandledRejection', err => console.error('❌ Error no manejado:', err));
 main();
+
+
+///////
