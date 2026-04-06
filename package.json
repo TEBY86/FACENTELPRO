@@ -1,19 +1,28 @@
-﻿{
+﻿# Eliminar archivos
+rm -f package.json package-lock.json
 
-  
+# Crear package.json limpio
+cat > package.json << 'EOF'
+{
   "name": "entel-factibilidad-bot",
   "version": "1.0.0",
-  "description": "Bot de factibilidad Entel",
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js"
   },
   "dependencies": {
-    "puppeteer": "^21.0.0",
+    "node-telegram-bot-api": "^0.64.0",
+    "puppeteer": "^24.0.0",
     "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2",
-    "node-telegram-bot-api": "^0.64.0"
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
   }
 }
+EOF
 
+# Instalar
+npm install
 
+# Subir
+git add package.json package-lock.json
+git commit -m "Fix: Clean package.json"
+git push origin main
