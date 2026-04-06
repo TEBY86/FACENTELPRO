@@ -1181,10 +1181,16 @@ async function procesarDireccion(textoDireccion, enviarMensaje, enviarFoto) {
   const browser = await puppeteer.launch({
     headless: "new",
     slowMo: 10,
-    args: ['--start-maximized','--no-sandbox','--disable-setuid-sandbox',
-           '--disable-blink-features=AutomationControlled','--ignore-certificate-errors'],
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium', // ← LÍNEA CLAVE
+    args: [
+        '--start-maximized',
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-blink-features=AutomationControlled',
+        '--ignore-certificate-errors'
+    ],
     defaultViewport: null
-  });
+});
 
   const page = await browser.newPage();
   await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36');
