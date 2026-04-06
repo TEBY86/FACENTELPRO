@@ -1,6 +1,6 @@
 ﻿# ─────────────────────────────────────────────
 #  Base: Node 20 sobre Debian Bullseye (slim)
-#  Compatible con Puppeteer y Railway
+#  Compatible con Puppeteer y 
 # ─────────────────────────────────────────────
 FROM node:20-bullseye-slim
 
