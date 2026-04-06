@@ -1,15 +1,17 @@
-﻿
-{
-  "name": "entel-factibilidad-bot",
+﻿{
+  "name": "bot-factibilidad-entel",
   "version": "1.0.0",
   "main": "bot.js",
   "scripts": {
-    "start": "node bot.js"
+    "start": "node index.js"
   },
   "dependencies": {
-    "node-telegram-bot-api": "^0.64.0",
-    "puppeteer": "^24.0.0",
+    "node-telegram-bot-api": "^0.66.0",
+    "puppeteer": "^19.11.1",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }
