@@ -6,20 +6,16 @@
 FROM node:20-slim
 
 # ── Variables de entorno para Puppeteer ──────────────────────
+# CRÍTICO: deben estar definidas ANTES de npm install
+# para que puppeteer no descargue su propio Chrome
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
     NODE_ENV=production \
-    # Evita que Chromium crashee en contenedores sin GPU
     DISPLAY=:99
 
-# ── Dependencias del sistema (Chromium + fuentes + libs) ─────
+# ── Dependencias del sistema (Chromium + libs) ───────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
     chromium \
-    chromium-sandbox \
-    # Fuentes para renders correctos
-    fonts-liberation \
-    fonts-noto-color-emoji \
-    # Libs necesarias para Chromium headless
     libasound2 \
     libatk-bridge2.0-0 \
     libatk1.0-0 \
@@ -37,34 +33,34 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxrandr2 \
     libxss1 \
     libxtst6 \
+    fonts-liberation \
+    fonts-noto-color-emoji \
     ca-certificates \
     wget \
-    # Limpiar cache para reducir tamaño de imagen
     && rm -rf /var/lib/apt/lists/*
 
-# ── Directorio de trabajo ─────────────────────────────────────
+# ── Verificar que Chromium quedó instalado ───────────────────
+RUN chromium --version
+
+# ── Directorio de trabajo ────────────────────────────────────
 WORKDIR /app
 
 # ── Copiar package.json primero (caching de capas) ───────────
 COPY package*.json ./
 
-# ── Instalar dependencias Node (solo producción) ──────────────
+# ── Instalar dependencias Node (solo producción) ─────────────
 RUN npm ci --omit=dev && npm cache clean --force
 
-# ── Copiar el resto del código ────────────────────────────────
+# ── Copiar el resto del código ───────────────────────────────
 COPY . .
 
-# ── Crear carpeta de imágenes si no existe ────────────────────
+# ── Crear carpeta de imágenes si no existe ───────────────────
 RUN mkdir -p imagenes
 
 # ── Usuario no-root por seguridad ────────────────────────────
-# Railway no requiere esto pero es buena práctica
 RUN groupadd -r botuser && useradd -r -g botuser -G audio,video botuser \
     && chown -R botuser:botuser /app
 USER botuser
 
-# ── Puerto (Railway lo asigna automáticamente, pero lo declaramos) ──
-EXPOSE 3000
-
-# ── Comando de inicio ─────────────────────────────────────────
+# ── Comando de inicio ────────────────────────────────────────
 CMD ["node", "index.js"]
