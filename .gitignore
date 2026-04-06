@@ -1,3 +1,31 @@
-﻿node_modules
+﻿Dependencias
+
+node_modules/
+
+Logs
+
+logs
+.log
 npm-debug.log
+
+Variables de entorno y secretos
+
 .env
+
+Imágenes temporales generadas por el bot (Capturas de pantalla)
+
+diagnostico_.png
+error_.png
+modal_.png
+factibilidad_.png
+
+Caché de Puppeteer (si corres el bot localmente)
+
+.cache/
+.puppeteer/
+.puppeteer_cache/
+
+Archivos del sistema operativo (Mac/Windows)
+
+.DS_Store
+Thumbs.db

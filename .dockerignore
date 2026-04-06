@@ -1,4 +1,40 @@
-﻿node_modules
-npm-debug.log
+﻿Dependencias locales (CRUCIAL: Docker debe instalar las suyas propias)
+
+node_modules/
+
+Logs de NPM
+
+npm-debug.log*
+*.log
+
+Variables de entorno y secretos locales
+
 .env
-.git
+
+Archivos de control de versiones
+
+.git/
+.gitignore
+
+Archivos de configuración de Docker (no necesitan estar dentro de la imagen)
+
+Dockerfile
+.dockerignore
+
+Imágenes temporales generadas localmente (para no subir basura a la nube)
+
+diagnostico_.png
+error_.png
+modal_.png
+factibilidad_.png
+
+Caché local de Puppeteer
+
+.cache/
+.puppeteer/
+.puppeteer_cache/
+
+Archivos del sistema operativo
+
+.DS_Store
+Thumbs.db
