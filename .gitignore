@@ -1,31 +1,17 @@
-﻿Dependencias
-
+﻿# ── Node ──────────────────────────────────────────────────────
 node_modules/
+npm-debug.log*
 
-Logs
-
-logs
-.log
-npm-debug.log
-
-Variables de entorno y secretos
-
+# ── Variables de entorno ──────────────────────────────────────
 .env
+.env.local
 
-Imágenes temporales generadas por el bot (Capturas de pantalla)
+# ── Screenshots generados en runtime ─────────────────────────
+diagnostico_*.png
+modal_*.png
+factibilidad_*.png
+error_*.png
 
-diagnostico_.png
-error_.png
-modal_.png
-factibilidad_.png
-
-Caché de Puppeteer (si corres el bot localmente)
-
-.cache/
-.puppeteer/
-.puppeteer_cache/
-
-Archivos del sistema operativo (Mac/Windows)
-
+# ── OS ────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db

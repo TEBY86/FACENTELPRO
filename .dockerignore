@@ -1,40 +1,39 @@
-﻿Dependencias locales (CRUCIAL: Docker debe instalar las suyas propias)
-
-node_modules/
-
-Logs de NPM
-
+﻿# ── Node ──────────────────────────────────────────────────────
+node_modules
 npm-debug.log*
-*.log
+yarn-debug.log*
+yarn-error.log*
 
-Variables de entorno y secretos locales
+# ── Screenshots / logs generados en runtime ───────────────────
+*.png
+*.jpg
+*.jpeg
+diagnostico_*.png
+modal_*.png
+factibilidad_*.png
+error_*.png
 
-.env
-
-Archivos de control de versiones
-
-.git/
+# ── Git ───────────────────────────────────────────────────────
+.git
 .gitignore
 
-Archivos de configuración de Docker (no necesitan estar dentro de la imagen)
+# ── Variables de entorno locales ──────────────────────────────
+.env
+.env.local
+.env.*.local
 
-Dockerfile
-.dockerignore
-
-Imágenes temporales generadas localmente (para no subir basura a la nube)
-
-diagnostico_.png
-error_.png
-modal_.png
-factibilidad_.png
-
-Caché local de Puppeteer
-
-.cache/
-.puppeteer/
-.puppeteer_cache/
-
-Archivos del sistema operativo
-
+# ── Editores / OS ─────────────────────────────────────────────
 .DS_Store
 Thumbs.db
+.vscode
+.idea
+
+# ── Tests / CI ────────────────────────────────────────────────
+*.test.js
+*.spec.js
+coverage
+
+# ── Docker ────────────────────────────────────────────────────
+Dockerfile
+.dockerignore
+docker-compose*.yml

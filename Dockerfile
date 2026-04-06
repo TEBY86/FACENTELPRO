@@ -1,74 +1,70 @@
-﻿# ─────────────────────────────────────────────
-#  Base: Node 20 sobre Debian Bullseye (slim)
-#  Compatible con Puppeteer y 
-# ─────────────────────────────────────────────
-FROM node:20-bullseye-slim
+﻿# ============================================================
+# Dockerfile — Bot Factibilidad Entel (Puppeteer + Telegram)
+# Compatible con Railway · Optimizado para producción
+# ============================================================
 
-# Evitar prompts interactivos en apt
-ENV DEBIAN_FRONTEND=noninteractive
+FROM node:20-slim
 
-# ── Dependencias del sistema para Chromium/Puppeteer ──
-RUN apt-get update && apt-get install -y \
-    wget \
-    curl \
-    gnupg \
-    ca-certificates \
+# ── Variables de entorno para Puppeteer ──────────────────────
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
+    NODE_ENV=production \
+    # Evita que Chromium crashee en contenedores sin GPU
+    DISPLAY=:99
+
+# ── Dependencias del sistema (Chromium + fuentes + libs) ─────
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    chromium \
+    chromium-sandbox \
+    # Fuentes para renders correctos
     fonts-liberation \
     fonts-noto-color-emoji \
+    # Libs necesarias para Chromium headless
+    libasound2 \
     libatk-bridge2.0-0 \
     libatk1.0-0 \
-    libcairo2 \
     libcups2 \
     libdbus-1-3 \
-    libexpat1 \
-    libfontconfig1 \
+    libdrm2 \
     libgbm1 \
-    libglib2.0-0 \
     libgtk-3-0 \
     libnspr4 \
     libnss3 \
-    libpango-1.0-0 \
-    libpangocairo-1.0-0 \
-    libx11-6 \
     libx11-xcb1 \
-    libxcb1 \
     libxcomposite1 \
-    libxcursor1 \
     libxdamage1 \
-    libxext6 \
     libxfixes3 \
-    libxi6 \
     libxrandr2 \
-    libxrender1 \
     libxss1 \
     libxtst6 \
-    lsb-release \
-    xdg-utils \
-    --no-install-recommends \
+    ca-certificates \
+    wget \
+    # Limpiar cache para reducir tamaño de imagen
     && rm -rf /var/lib/apt/lists/*
 
-# ── Directorio de trabajo ──
+# ── Directorio de trabajo ─────────────────────────────────────
 WORKDIR /app
 
-# ── Copiar dependencias primero (cache de capas) ──
+# ── Copiar package.json primero (caching de capas) ───────────
 COPY package*.json ./
 
-# ── Instalar dependencias Node ──
-# PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=false → descarga Chromium incluido con Puppeteer
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=false
-RUN npm ci --omit=dev
+# ── Instalar dependencias Node (solo producción) ──────────────
+RUN npm ci --omit=dev && npm cache clean --force
 
-# ── Copiar el resto del proyecto ──
+# ── Copiar el resto del código ────────────────────────────────
 COPY . .
 
-# ── Variables de entorno (se sobreescriben en Railway) ──
-ENV NODE_ENV=production
-ENV TELEGRAM_TOKEN=""
+# ── Crear carpeta de imágenes si no existe ────────────────────
+RUN mkdir -p imagenes
 
-# ── Usuario sin privilegios (buena práctica de seguridad) ──
+# ── Usuario no-root por seguridad ────────────────────────────
+# Railway no requiere esto pero es buena práctica
 RUN groupadd -r botuser && useradd -r -g botuser -G audio,video botuser \
     && chown -R botuser:botuser /app
 USER botuser
 
-# ── Comando de inicio ──
-CMD ["node", "entel_bot.js"]
+# ── Puerto (Railway lo asigna automáticamente, pero lo declaramos) ──
+EXPOSE 3000
+
+# ── Comando de inicio ─────────────────────────────────────────
+CMD ["node", "index.js"]
