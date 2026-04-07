@@ -10,7 +10,7 @@ const delay = ms => new Promise(r => setTimeout(r, ms));
 
 /* ===============================
    CONFIGURACIÓN
-================================*/
+================================*//////
 
 const CONFIG = {
   CANAL: 'telegram',
