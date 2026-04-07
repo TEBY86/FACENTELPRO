@@ -1182,14 +1182,14 @@ const browser = await puppeteer.launch({
   slowMo: 10,
   executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
   args: [
-    '--start-maximized',
+    '--window-size=1920,1080',      // ← reemplaza --start-maximized
     '--no-sandbox',
     '--disable-setuid-sandbox',
     '--disable-blink-features=AutomationControlled',
     '--ignore-certificate-errors',
-    '--disable-dev-shm-usage',  // ← AGREGAR ESTA
+    '--disable-dev-shm-usage',
   ],
-  defaultViewport: null
+  defaultViewport: { width: 1920, height: 1080 }  // ← en vez de null
 });
 
   const page = await browser.newPage();
