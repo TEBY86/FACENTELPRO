@@ -1,17 +1,2 @@
-﻿# ── Node ──────────────────────────────────────────────────────
-node_modules/
-npm-debug.log*
-
-# ── Variables de entorno ──────────────────────────────────────
 .env
-.env.local
-
-# ── Screenshots generados en runtime ─────────────────────────
-diagnostico_*.png
-modal_*.png
-factibilidad_*.png
-error_*.png
-
-# ── OS ────────────────────────────────────────────────────────
-.DS_Store
-Thumbs.db
+node_modules

@@ -1,14 +1,7 @@
-﻿FROM node:20-bookworm-slim
-
-# Instalar Chromium y todas las dependencias necesarias
+FROM node:20-bookworm-slim
 RUN apt-get update && apt-get install -y \
     chromium \
     fonts-liberation \
-    fonts-ipafont-gothic \
-    fonts-wqy-zenhei \
-    fonts-thai-tlwg \
-    fonts-kacst \
-    fonts-freefont-ttf \
     libnss3 \
     libx11-6 \
     libxcb1 \
@@ -28,36 +21,13 @@ RUN apt-get update && apt-get install -y \
     libxrandr2 \
     libxss1 \
     libgtk-3-0 \
-    --no-install-recommends \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Variables de entorno para puppeteer
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     NODE_ENV=production
-
-# Crear directorio de trabajo
 WORKDIR /app
-
-# Copiar archivos de dependencias
-COPY package*.json ./
-
-# Instalar dependencias
+COPY package.json package-lock.json ./
 RUN npm install
-
-# Copiar el resto del código
 COPY . .
-
-# Crear directorio para imágenes (si no existe)
-RUN mkdir -p imagenes
-
-# Crear usuario no-root para mayor seguridad (opcional pero recomendado)
-RUN groupadd -r pptruser && useradd -r -g pptruser -G audio,video pptruser \
-    && chown -R pptruser:pptruser /app
-
-# Cambiar a usuario no-root
-USER pptruser
-
-# Comando para ejecutar el bot
+RUN ls -la /app && ls -la /app/bots && ls -la /app/comunas
 CMD ["npm", "start"]
