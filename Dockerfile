@@ -29,5 +29,4 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install
 COPY . .
-RUN ls -la /app && ls -la /app/bots && ls -la /app/comunas
 CMD ["npm", "start"]
