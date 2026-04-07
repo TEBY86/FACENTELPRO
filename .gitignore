@@ -1,2 +1,24 @@
+Dependencias
+
+node_modules/
+
+Variables de entorno y secretos
+
 .env
-node_modules
+
+Logs de depuración
+
+npm-debug.log
+*.log
+
+Capturas de pantalla temporales generadas por Puppeteer
+
+diagnostico_.png
+factibilidad_.png
+modal_.png
+error_.png
+
+Archivos del sistema operativo
+
+.DS_Store
+Thum
