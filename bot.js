@@ -1153,7 +1153,7 @@ if (!resCalle.ok) {
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////7
-await delay(6000);  // ← después de este delay
+await delay(7000);  // ← después de este delay
 
 // 🔥 AQUÍ SE COLOCA EL BLOQUE
 const modalServicioActivo = await page.$('h5.f-inter-bold span:has-text("Esta dirección ya tiene un servicio contratado")');
