@@ -14,7 +14,7 @@ const delay = ms => new Promise(r => setTimeout(r, ms));
 
 const CONFIG = {
   CANAL: 'telegram',
-  TELEGRAM_TOKEN: '8645647894:AAFDQFUs5PfDszCtzbDlYrJccCV5ul94sEs',
+  TELEGRAM_TOKEN: '7892705094:AAGxa56fsyhaiQ1-iMfsjstqBvrANZoBIek',
   
 };
 
@@ -390,7 +390,7 @@ function parsearDireccion(texto) {
   }
 
   // --- CALLE ---
-  let calle = t;
+  let calle = partePrincipal;  // ← USA SOLO LO QUE ESTÁ ANTES DE LA COMA   ////  NO BORRAR
   if (numero) calle = calle.replace(numero, '').trim();
   if (matchDepto) calle = calle.replace(normalize(matchDepto[0]), '').trim();
   if (comuna) calle = calle.replace(comuna, '').trim();
@@ -1086,8 +1086,22 @@ async function intentarCombinacion(page, region, comuna, calle, numero, depto) {
   await page.waitForNetworkIdle({ timeout: 5000 }).catch(() => {});
   await delay(600);
 
-  const resCalle = await seleccionar(page, 2, calle);
+
+
+
+  const resCalle = await seleccionar(page, 2, calle);        ///// NO MODIFICAR    RESUELVE  2264-c3
 if (!resCalle.ok) { 
+
+  // ── NUEVO: detectar sufijo en calle y reintentar ──
+  const matchSufijo = calle.match(/(-[A-Za-z0-9]+)/);     //////////   NO MODIFICAR  ///////////
+  if (matchSufijo) {                                      ///////////////////////////////////////7
+    const calleCorregida = calle.replace(matchSufijo[1], '').trim(); //////////////////////////////////
+    const numeroCorregido = numero + matchSufijo[1];                /////////////////////////////////////7
+    console.log(`   🔧 Reintentando con calle="${calleCorregida}" numero="${numeroCorregido}"`);   /////////
+    return await intentarCombinacion(page, region, comuna, calleCorregida, numeroCorregido, depto);  ///////////
+  }    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // ─────────────────────────────────────────────────
+
   await leerPantalla(page, `FALLO CALLE: ${calle}`); 
   return {
     factible: false,
@@ -1095,7 +1109,6 @@ if (!resCalle.ok) {
     sugerenciasCalle: resCalle.opcionesDisponibles ? resCalle.opcionesDisponibles.map(op => op.texto) : []
   };
 }
-
 
   // OMITIDO probarOpcionesDesplegable para no arruinar la selección original correcta
   await page.waitForNetworkIdle({ timeout: 8000 }).catch(() => {});
@@ -1138,6 +1151,35 @@ if (!resCalle.ok) {
     }
   }
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////7
+await delay(6000);  // ← después de este delay
+
+// 🔥 AQUÍ SE COLOCA EL BLOQUE
+const modalServicioActivo = await page.$('h5.f-inter-bold span:has-text("Esta dirección ya tiene un servicio contratado")');
+
+if (modalServicioActivo) {
+  const modalDiv = await page.$('div.text-align-center.ThemeGrid_Width10');
+  const box = await modalDiv.boundingBox();
+  const path = `servicio_activo_${Date.now()}.png`;
+  
+  await page.screenshot({
+    path: path,
+    clip: {
+      x: box.x - 15,
+      y: box.y - 15,
+      width: box.width + 30,
+      height: box.height + 30
+    }
+  });
+  
+  return { bloqueado: true, modal: { tipo: 'servicio_activo', mensajeEnvio: '⚠️ Esta dirección ya tiene un servicio Entel activo.', screenshotPath: path } };
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
   const modalDetectado = await detectarModal(page);
   if (modalDetectado && (modalDetectado.tipo === 'servicio_activo' || modalDetectado.tipo === 'error'))
     return { bloqueado: true, modal: modalDetectado };
@@ -1178,7 +1220,7 @@ async function procesarDireccion(textoDireccion, enviarMensaje, enviarFoto) {
     return;
   }
 const browser = await puppeteer.launch({
-  headless: true,
+  headless: "new",
   slowMo: 10,
   executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
   args: [
@@ -1303,6 +1345,17 @@ if (fs.existsSync(rutaImagen)) await enviarFoto(rutaImagen, '📭 Sin cobertura 
     }
 
   } catch (err) {
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+       // ✅ AGREGAR ESTAS LÍNEAS
+    if (err.message.includes('has-text')) {
+      await enviarMensaje(`⚠️ Esta dirección ya tiene un servicio contratado o no está disponible.`);
+      // Intentar tomar captura del modal igualmente
+      const modalPath = `servicio_activo_${Date.now()}.png`;
+      await page.screenshot({ path: modalPath, fullPage: true }).catch(() => {});
+      if (fs.existsSync(modalPath)) await enviarFoto(modalPath, '📸 Estado de la dirección');
+      return;
+    }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     console.error('❌ Error:', err.message);
     const errorPath = `error_${Date.now()}.png`;
     await page.screenshot({ path: errorPath, fullPage: true }).catch(() => {});
