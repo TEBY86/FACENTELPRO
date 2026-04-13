@@ -1220,7 +1220,7 @@ async function procesarDireccion(textoDireccion, enviarMensaje, enviarFoto) {
     return;
   }
 const browser = await puppeteer.launch({
-  headless: "new",
+  headless: true,
   slowMo: 10,
   executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
   args: [
