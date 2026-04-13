@@ -14,7 +14,7 @@ const delay = ms => new Promise(r => setTimeout(r, ms));
 
 const CONFIG = {
   CANAL: 'telegram',
-  TELEGRAM_TOKEN: '7892705094:AAGxa56fsyhaiQ1-iMfsjstqBvrANZoBIek',
+  TELEGRAM_TOKEN: '7705426798:AAHCcjK2kWGvNk3xb06tgENMYilXHK9hhj8',
   
 };
 
