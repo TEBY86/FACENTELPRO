@@ -1115,17 +1115,20 @@ if (!resCalle.ok) {
   await delay(600);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   const resNumero = await seleccionar(page, 3, numero);
-// 🔥 AQUÍ AFUERA:
 
-    if (!resNumero.ok) {
+// ✅ Captura SIEMPRE antes del if, para que esté disponible en todos los casos
+const variantesNumero = resNumero.opcionesDisponibles?.map(op => op.texto) || [];
+const numeroSeleccionado = resNumero.seleccionado || numero;
+
+if (!resNumero.ok) {
   return {
     factible: false,
     falloNumero: true,
-    sugerencias: resNumero.opcionesDisponibles ? resNumero.opcionesDisponibles.map(op => op.texto) : []
+    sugerencias: variantesNumero,
+    variantesNumero,       // ✅ ahora siempre presente
+    numeroSeleccionado     // ✅ ahora siempre presente
   };
 }
-const variantesNumero = resNumero.opcionesDisponibles?.map(op => op.texto) || [];
-const numeroSeleccionado = resNumero.seleccionado || numero;
  
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1184,8 +1187,7 @@ if (modalServicioActivo) {
 
   const modalDetectado = await detectarModal(page);
   if (modalDetectado && (modalDetectado.tipo === 'servicio_activo' || modalDetectado.tipo === 'error'))
-    return { bloqueado: true, modal: modalDetectado };
-
+    return { bloqueado: true, modal: modalDetectado, variantesNumero, numeroSeleccionado };
   const resultadoFactibilidad = await checkFactibilidad(page, `${calle} ${numero}${depto ? ' depto ' + depto : ''}, ${comuna}`);
   
   // Pegar las opciones sugeridas al objeto resultado si todo salió bien hasta aquí (pero no hay cobertura)
@@ -1289,11 +1291,17 @@ if (resultado) {
     }
 
     // Enviar resultado
-    if (resultadoFinal?.tipo === 'servicio_activo') {
-      await enviarMensaje(resultadoFinal.mensajeEnvio);
-      if (resultadoFinal.screenshotPath && fs.existsSync(resultadoFinal.screenshotPath))
-        await enviarFoto(resultadoFinal.screenshotPath, '📸 Screenshot del aviso');
+   if (resultadoFinal?.tipo === 'servicio_activo') {
+  const varianteUsada = resultadoFinal.numeroSeleccionado || dir.numero;
+  const variantesLista = resultadoFinal.variantesNumero?.length > 1
+    ? resultadoFinal.variantesNumero.slice(0, 5).join(' • ')
+    : null;
 
+  let msg = resultadoFinal.mensajeEnvio;
+  if (variantesLista) msg += `\n\n◾ *Número usado:* ${varianteUsada}\n◾ *Opciones:* ${variantesLista}`;
+  
+  await enviarMensaje(msg);
+  // ... resto igual
 
 
 /////////////////////////////////////////////////////////////
@@ -1503,7 +1511,8 @@ bot.on('message', async (msg) => {
       `📊 *Consumo*\n\n` +
       `📅 \`${barraUsado}\` ${s.dia.restantes} de ${maximo}\n` +
       `📆 ${s.semana.restantes} esta semana`;
-        `💡 *Recuerda:* Por cada *venta instalada* se te cargará *más cupo de consultas* automáticamente.`;
+       `💡 *Recuerda:* Por cada *venta instalada* se te cargará *más cupo de consultas* automáticamente.`;
+
     
     await bot.sendMessage(chatId, quedaMsg, { parse_mode: 'Markdown' });
   }
