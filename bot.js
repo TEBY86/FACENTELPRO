@@ -1159,23 +1159,20 @@ if (!resCalle.ok) {
 await delay(7000);  // ← después de este delay
 
 // 🔥 AQUÍ SE COLOCA EL BLOQUE
-const modalServicioActivo = await page.$('h5.f-inter-bold span:has-text("Esta dirección ya tiene un servicio contratado")');
+// REEMPLAZAR el bloque problemático por este:
+const modalServicioActivo = await page.evaluate(() => {
+  const spans = document.querySelectorAll('h5 span, h5');
+  for (const el of spans) {
+    if (el.innerText?.toLowerCase().includes('esta dirección ya tiene un servicio')) {
+      return true;
+    }
+  }
+  return false;
+});
 
 if (modalServicioActivo) {
-  const modalDiv = await page.$('div.text-align-center.ThemeGrid_Width10');
-  const box = await modalDiv.boundingBox();
   const path = `servicio_activo_${Date.now()}.png`;
-  
-  await page.screenshot({
-    path: path,
-    clip: {
-      x: box.x - 15,
-      y: box.y - 15,
-      width: box.width + 30,
-      height: box.height + 30
-    }
-  });
-  
+  await page.screenshot({ path, fullPage: true });
   return { bloqueado: true, modal: { tipo: 'servicio_activo', mensajeEnvio: '⚠️ Esta dirección ya tiene un servicio Entel activo.', screenshotPath: path } };
 }
 
@@ -1360,15 +1357,7 @@ if (fs.existsSync(rutaImagen)) await enviarFoto(rutaImagen, '📭 Sin cobertura 
 
   } catch (err) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-       // ✅ AGREGAR ESTAS LÍNEAS
-    if (err.message.includes('has-text')) {
-      await enviarMensaje(`⚠️ Esta dirección ya tiene un servicio contratado o no está disponible.`);
-      // Intentar tomar captura del modal igualmente
-      const modalPath = `servicio_activo_${Date.now()}.png`;
-      await page.screenshot({ path: modalPath, fullPage: true }).catch(() => {});
-      if (fs.existsSync(modalPath)) await enviarFoto(modalPath, '📸 Estado de la dirección');
-      return;
-    }
+      
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     console.error('❌ Error:', err.message);
     const errorPath = `error_${Date.now()}.png`;
