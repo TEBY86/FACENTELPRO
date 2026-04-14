@@ -1124,6 +1124,9 @@ if (!resCalle.ok) {
       sugerencias: resNumero.opcionesDisponibles ? resNumero.opcionesDisponibles.map(op => op.texto) : []
     }; 
   }
+  const variantesNumero = resNumero.opcionesDisponibles?.map(op => op.texto) || [];
+
+
   // OMITIDO probarOpcionesDesplegable para que se quede con la función estricta encontrarMejorNumero
   await page.waitForNetworkIdle({ timeout: 5000 }).catch(() => {});
   await delay(800);
@@ -1295,8 +1298,11 @@ if (resultado) {
 
     } else if (resultadoFinal?.factible === true) {
   // Enviar mensaje primero
-  await enviarMensaje(resultadoFinal.mensaje);
-  
+   await enviarMensaje(`✅ ¡Hay factibilidad para ${dir.calle} ${combinacionExitosa?.numero || dir.numero}${dir.depto ? ' depto ' + dir.depto : ''}, ${dir.comuna}!\n\n📌 *Nota:* En el sistema, la dirección aparece como *${dir.calle} ${combinacionExitosa?.numero || dir.numero}*.`);
+  // 🔥 AGREGAR ESTAS 3 LÍNEAS
+  if (resultadoFinal.variantesNumero?.length > 1) {
+    await enviarMensaje(`📌 *Opciones disponibles en el sistema:*\n• ${resultadoFinal.variantesNumero.slice(0, 5).join('\n• ')}`);
+  }
   // Enviar la imagen local entel.png
   const rutaImagen = path.join(__dirname, 'imagenes', 'entel.png');
   if (fs.existsSync(rutaImagen)) {
