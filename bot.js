@@ -1113,19 +1113,21 @@ if (!resCalle.ok) {
   // OMITIDO probarOpcionesDesplegable para no arruinar la selección original correcta
   await page.waitForNetworkIdle({ timeout: 8000 }).catch(() => {});
   await delay(600);
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   const resNumero = await seleccionar(page, 3, numero);
-  if (!resNumero.ok) { 
-    await leerPantalla(page, `FALLO NÚMERO: ${numero}`); 
-    // Retornamos un objeto indicando fallo de número, pero extrayendo las sugerencias si las hay
-    return {
-      factible: false,
-      falloNumero: true,
-      sugerencias: resNumero.opcionesDisponibles ? resNumero.opcionesDisponibles.map(op => op.texto) : []
-    }; 
-  }
-  const variantesNumero = resNumero.opcionesDisponibles?.map(op => op.texto) || [];
+// 🔥 AQUÍ AFUERA:
 
+    if (!resNumero.ok) {
+  return {
+    factible: false,
+    falloNumero: true,
+    sugerencias: resNumero.opcionesDisponibles ? resNumero.opcionesDisponibles.map(op => op.texto) : []
+  };
+}
+const variantesNumero = resNumero.opcionesDisponibles?.map(op => op.texto) || [];
+const numeroSeleccionado = resNumero.seleccionado || numero;
+ 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   // OMITIDO probarOpcionesDesplegable para que se quede con la función estricta encontrarMejorNumero
   await page.waitForNetworkIdle({ timeout: 5000 }).catch(() => {});
@@ -1193,6 +1195,7 @@ if (modalServicioActivo) {
   
   // 🔥 AGREGAR ESTA LÍNEA
 resultadoFactibilidad.variantesNumero = variantesNumero;
+resultadoFactibilidad.numeroSeleccionado = numeroSeleccionado; // 🔥 AGREGAR
   return resultadoFactibilidad;
 }
 
@@ -1295,7 +1298,7 @@ if (resultado) {
 
 /////////////////////////////////////////////////////////////
 } else if (resultadoFinal?.factible === true) {
-  const varianteUsada = combinacionExitosa?.numero || dir.numero;
+  const varianteUsada = resultadoFinal.numeroSeleccionado || combinacionExitosa?.numero || dir.numero;
   const variantesLista = resultadoFinal.variantesNumero?.length > 1
     ? resultadoFinal.variantesNumero.slice(0, 5).join(' • ')
     : null;
