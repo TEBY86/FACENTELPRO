@@ -1194,6 +1194,8 @@ if (modalServicioActivo) {
     resultadoFactibilidad.sugerencias = resNumero.opcionesDisponibles.map(op => op.texto);
   }
   
+  // 🔥 AGREGAR ESTA LÍNEA
+resultadoFactibilidad.variantesNumero = variantesNumero;
   return resultadoFactibilidad;
 }
 
