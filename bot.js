@@ -1106,9 +1106,12 @@ if (!resCalle.ok) {
   return {
     factible: false,
     falloCalle: true,
-    sugerenciasCalle: resCalle.opcionesDisponibles ? resCalle.opcionesDisponibles.map(op => op.texto) : []
-  };
+    sugerenciasCalle: resCalle.opcionesDisponibles ? resCalle.opcionesDisponibles.map(op => op.texto) : [],
+    calleSeleccionada: resCalle.seleccionado || calle
+};
+  
 }
+
 
   // OMITIDO probarOpcionesDesplegable para no arruinar la selección original correcta
   await page.waitForNetworkIdle({ timeout: 8000 }).catch(() => {});
