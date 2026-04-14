@@ -1297,14 +1297,20 @@ if (resultado) {
 
 
 /////////////////////////////////////////////////////////////
+} else if (resultadoFinal?.factible === true) {
+  const varianteUsada = combinacionExitosa?.numero || dir.numero;
+  const variantesLista = resultadoFinal.variantesNumero?.length > 1
+    ? resultadoFinal.variantesNumero.slice(0, 5).join(' • ')
+    : null;
 
-    } else if (resultadoFinal?.factible === true) {
-  // Enviar mensaje primero
-   await enviarMensaje(`✅ ¡Hay factibilidad para ${dir.calle} ${combinacionExitosa?.numero || dir.numero}${dir.depto ? ' depto ' + dir.depto : ''}, ${dir.comuna}!\n\n📌 *Nota:* En el sistema, la dirección aparece como *${dir.calle} ${combinacionExitosa?.numero || dir.numero}*.`);
-  // 🔥 AGREGAR ESTAS 3 LÍNEAS
-  if (resultadoFinal.variantesNumero?.length > 1) {
-    await enviarMensaje(`📌 *Opciones disponibles en el sistema:*\n• ${resultadoFinal.variantesNumero.slice(0, 5).join('\n• ')}`);
-  }
+  let mensaje = `✅ *Hay factibilidad* ✅\n\n` +
+    `📍 ${dir.calle} ${varianteUsada}${dir.depto ? ', Depto ' + dir.depto : ''}, ${dir.comuna}\n\n` +
+    `◾ *Ingresaste:* ${dir.calle} ${dir.numero}\n` +
+    `◾ *Se usó:* ${varianteUsada}\n` +
+    (variantesLista ? `◾ *Opciones:* ${variantesLista}\n` : '') +
+    `◾ *Entel Fibra disponible*`;
+
+  await enviarMensaje(mensaje);
   // Enviar la imagen local entel.png
   const rutaImagen = path.join(__dirname, 'imagenes', 'entel.png');
   if (fs.existsSync(rutaImagen)) {
