@@ -3,7 +3,6 @@ const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
 const path = require('path');
-const axios = require('axios');  // ← Agregar esta línea
 
 // Elimina los warnings molestos de la librería de Telegram
 process.env.NTBA_FIX_350 = 1; 
@@ -1153,7 +1152,6 @@ function iniciarTelegram() {
     );
   });
 
-
   // ─── COMANDO /rut ─────────────────────────────────────────────
 const API_SERVER = process.env.API_SERVER || 'http://localhost:3001';
 
@@ -1170,14 +1168,13 @@ bot.onText(/\/rut (.+)/, async (msg, match) => {
   await bot.sendMessage(chatId, `🔍 Consultando RUT: ${rut}...`);
 
   try {
-    const respuesta = await axios.post(`${API_SERVER}/rut`, {
-      rut: rut
-    }, {
+    const res = await fetch(`${API_SERVER}/rut`, {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      timeout: 120000
+      body: JSON.stringify({ rut }),
+      signal: AbortSignal.timeout(120000)
     });
-
-    const datos = respuesta.data;
+    const datos = await res.json();
 
     if (datos.ok) {
       await bot.sendMessage(chatId,
@@ -1197,19 +1194,9 @@ bot.onText(/\/rut (.+)/, async (msg, match) => {
       await bot.sendMessage(chatId, `❌ Error: ${datos.error}`);
     }
   } catch (err) {
-    // Manejo específico de errores de axios
-    if (err.code === 'ECONNABORTED') {
-      await bot.sendMessage(chatId, `❌ Timeout: El servidor no respondió en 2 minutos.`);
-    } else if (err.response) {
-      await bot.sendMessage(chatId, `❌ Error del servidor: ${err.response.status}`);
-    } else if (err.request) {
-      await bot.sendMessage(chatId, `❌ No se pudo conectar al servidor API.`);
-    } else {
-      await bot.sendMessage(chatId, `❌ Error: ${err.message}`);
-    }
+    await bot.sendMessage(chatId, `❌ No se pudo conectar.\n${err.message}`);
   }
 });
-
 
   bot.on('message', async (msg) => {
     if (msg.text?.startsWith('/')) return;
@@ -1249,34 +1236,24 @@ bot.onText(/\/rut (.+)/, async (msg, match) => {
     await procesarDireccion(texto, enviarMensaje, enviarFoto);
     
     const permisoActualizado = await verificarPermiso(msg.from.id, null, 'consultar');
+    if (permisoActualizado.estadisticas) {
+      const s = permisoActualizado.estadisticas;
+      
+      const usado = s.dia.usadas;
+      const maximo = s.dia.maximo;
+      const porcentajeUsado = Math.round((usado / maximo) * 100);
+      const barraUsado = '▰'.repeat(Math.floor(porcentajeUsado / 5)) + '▱'.repeat(20 - Math.floor(porcentajeUsado / 5));
+      
+      const quedaMsg = 
+        `📊 *Consumo*\n\n` +
+        `📅 \`${barraUsado}\` ${s.dia.restantes} de ${maximo}\n` +
+        `📆 ${s.semana.restantes} esta semana\n` +
+        `💡 *Recuerda:* Por cada *venta instalada* se te cargará *más cupo de consultas* automáticamente.`;
+      
+      await bot.sendMessage(chatId, quedaMsg, { parse_mode: 'Markdown' });
+    }
+  });
 
-if (permisoActualizado?.estadisticas) {
-  const s = permisoActualizado.estadisticas;
-
-  const usado = Number(s.dia.usadas) || 0;
-  const maximo = Math.max(1, Number(s.dia.maximo) || 0);
-  const porcentaje = Math.min(100, Math.max(0, Math.round((usado / maximo) * 100)));
-
-  const restantesHoy = Number(s.dia.restantes) || 0;
-  const restantesSemana = Number(s.semana.restantes) || 0;
-
-  let hoyTexto = `${restantesHoy}`;
-  let emojiHoy = "📅";
-  let lineaTip = "🎯 *Tip:* cada venta *INSTALADA* carga *+cupos*";
-
-  if (restantesHoy === 0) {
-    emojiHoy = "⏳";
-    hoyTexto = "Sin cupo disponible";
-  } else if (restantesHoy <= 7) {
-    emojiHoy = "🔴";
-    hoyTexto = `*${restantesHoy}*`;
-  }
-
-  const msgConsumo = `📌 *Consultas:* ${usado}/${maximo} (${porcentaje}%)\n${emojiHoy} *Hoy:* ${hoyTexto} | *Semana:* ${restantesSemana}\n${lineaTip}`;
-
-   await bot.sendMessage(msg.chat.id, msgConsumo, { parse_mode: 'Markdown' });
-}
-});
   bot.on('polling_error', (err) => {
     console.error(`❌ Telegram error: ${err.message}`);
     if (err.message.includes('409')) {
@@ -1286,9 +1263,9 @@ if (permisoActualizado?.estadisticas) {
   });
 }
 
-/* ===============================
-   MAIN
-================================*/
+// ===============================
+//   MAIN
+// ===============================*/
 async function main() {
   console.log(`\n${"═".repeat(60)}`);
   console.log(`🚀 Bot Factibilidad Entel — Telegram`);
@@ -1296,5 +1273,13 @@ async function main() {
   iniciarTelegram();
 }
 
+// Exportar funciones para usar en api-server.js
+module.exports = { procesarDireccion, parsearDireccion };
+
+// Solo ejecutar main() si este archivo se corre directamente (no si es importado)
+if (require.main === module) {
+  main();
+}
+
 process.on('unhandledRejection', err => console.error('❌ Error no manejado:', err));
-main(); 
+// ❌ ELIMINAR esta línea: main();

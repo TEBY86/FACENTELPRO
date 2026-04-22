@@ -22,11 +22,17 @@ RUN apt-get update && apt-get install -y \
     libxss1 \
     libgtk-3-0 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     NODE_ENV=production
+#   ↑ Se elimina API_CELULAR de aquí — se pasa al correr el contenedor
+
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm install
-COPY . .
-CMD ["npm", "start"]
+RUN npm ci --omit=dev   # ← ESTO FALTABA — instala las dependencias
+COPY . .                
+
+EXPOSE 3001
+CMD ["sh", "-c", "node bot.js & node api-server.js"]
+
