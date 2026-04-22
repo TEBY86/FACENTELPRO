@@ -151,3 +151,8 @@ app.listen(PORT, () => {
 });
 
 process.on('unhandledRejection', err => console.error('❌ Error no manejado:', err.message));
+
+
+
+
+///////////////////////////////////////////////////////////////////  VAMOS QUE SE PUEDE 
