@@ -17,9 +17,14 @@ const delay = ms => new Promise(r => setTimeout(r, ms));
    CONFIGURACIÓN
 ================================*/
 
+//const CONFIG = {
+ // CANAL: 'telegram',
+  //TELEGRAM_TOKEN: '7892705094:AAGxa56fsyhaiQ1-iMfsjstqBvrANZoBIek',
+//};
+
 const CONFIG = {
-  CANAL: 'telegram',
-  TELEGRAM_TOKEN: '7892705094:AAGxa56fsyhaiQ1-iMfsjstqBvrANZoBIek',
+  CANAL: process.env.CANAL || 'telegram',
+  TELEGRAM_TOKEN: process.env.TELEGRAM_TOKEN,  // Railway lo inyecta automáticamente
 };
 
 const PERMISOS_URL = 'https://script.google.com/macros/s/AKfycbwVX-cyiGJl8vE3uBj0g6qWKv6ivNlHtir1BnoSqXVYHZwyB4E6mSEX2VSaeF623d0w/exec';
@@ -962,7 +967,7 @@ async function procesarDireccion(textoDireccion, enviarMensaje, enviarFoto) {
   }
   
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: true,
     slowMo: 10,
     args: [
       '--window-size=1920,1080',      
