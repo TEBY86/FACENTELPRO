@@ -1160,7 +1160,7 @@ function iniciarTelegram() {
 
 
   // ─── COMANDO /rut ─────────────────────────────────────────────
-const API_SERVER = process.env.API_SERVER || 'http://localhost:3001';
+const API_SERVER = process.env.API_SERVER || `http://localhost:${process.env.PORT || 3001}`;
 
 bot.onText(/\/rut (.+)/, async (msg, match) => {
   const chatId = msg.chat.id;
